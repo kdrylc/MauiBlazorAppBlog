@@ -1,0 +1,72 @@
+﻿@page "/cat"
+@using NetMauiBlazorApp.Models;
+@using NetMauiBlazorApp.Services;
+@inject ICategoryService cat
+@inject NavigationManager nav
+
+ <div class="container">
+    <h3>Category</h3>
+
+    @if (IsLoading)
+    {
+        <div style="position:fixed;top:50%;left:50%;margin-top:-50px;margin-left:-100px">
+            <img src="images/book.gif" />
+        </div>
+    }
+    else
+    {
+        <a class="btn btn-primary" href="/category/create">Create Category</a>
+        <table class="table table-bordered">
+            <thead>
+                <tr>
+                    <th>Id</th>
+                    <th>Name</th>
+                    <th>Description</th>
+                    <th>Date</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Categories)
+                {
+
+                    <tr>
+                        <td>@item.Id</td>
+                        <td>@item.Name</td>
+                        <td>@item.Description</td>
+                        <td>@item.Created</td>
+                        <td>
+                            <NavLink href="@($"/category/edit/{item.Id}")" class="btn btn-outline-success ">Edit </NavLink>
+                            <button class="btn btn-danger" @onclick="(()=>HandleDelete(item.Id))"> Delete</button>
+                        </td>
+
+                    </tr>
+
+                }
+            </tbody>
+        </table>
+
+    }
+</div>
+
+
+@code {
+    public List<CategoryModel> Categories { get; set; } = new List<CategoryModel>();
+    public int CategoryId { get; set; }
+    public bool IsLoading { get; set; } = true;
+    protected override async Task OnInitializedAsync()
+    {
+        await Task.Delay(500);
+        Categories = await cat.GettAllCategory();
+        IsLoading = false;
+
+    }
+    public async Task HandleDelete(int id)
+    {
+        await Task.Delay(500);
+        CategoryId = id;
+        await cat.DeleteCategory(CategoryId);
+        nav.NavigateTo("/cat");
+        IsLoading = false;
+    }
+}

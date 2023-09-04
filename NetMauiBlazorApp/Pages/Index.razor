@@ -1,0 +1,73 @@
+﻿@page "/dashboard"
+@page "/category/article/{categoryId:int}"
+
+@using NetMauiBlazorApp.Models;
+@using NetMauiBlazorApp.Services;
+
+@inject IArticleService art
+@inject ICategoryService cat
+
+
+@if (IsLoading)
+{
+    <div style="position:fixed;top:50%;left:50%;margin-top:-50px;margin-left:-100px">
+        <img src="images/book.gif" />
+    </div>
+}
+else
+{
+    <div class="container">
+        <div class="top-row navbar-light">
+            @foreach (var item in Categories)
+            {
+                <a class=" btn btn-danger m-lg-3" href="/category/article/@item.Id"> @item.Name </a>
+            }
+        </div>
+
+        <div class="row">
+            @foreach (var item in Articles)
+            {
+                <div class="col">
+                    <div class="card">
+
+                        <img class="card-img-top" src="images/imgg.jpg" alt="Card image cap">
+                        <div class="card-body">
+                            <h5 class="card-title">@item.Title</h5>
+                            <p class="card-text">@item.Summary</p>
+                            <a href="@($"/article/detail/{item.Id}")" class="btn btn-primary">Go somewhere</a>
+                        </div>
+
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+
+
+}
+
+@code {
+    [Parameter]
+    public int categoryId { get; set; }
+    public bool IsLoading { get; set; } = true;
+    public List<ArticleModel> Articles { get; set; } = new List<ArticleModel>();
+    public List<CategoryModel> Categories { get; set; } = new List<CategoryModel>();
+
+    protected override async Task OnParametersSetAsync()
+    {
+
+        Categories = await cat.GettAllCategory();
+        await Task.Delay(500);
+
+        if (categoryId == 0)
+        {
+            Articles = await art.GettAllArticle();
+            IsLoading = false;
+        }
+        else
+        {
+            Articles = await art.GetArticleByCategoryId(categoryId);
+            IsLoading = false;
+        }
+    }
+}

@@ -1,0 +1,97 @@
+﻿@page "/article/create"
+@page "/article/edit/{Id:int}"
+
+@using NetMauiBlazorApp.Models;
+@using NetMauiBlazorApp.Services;
+
+@inject IArticleService art
+@inject ICategoryService cat
+@inject NavigationManager nav
+@if (IsLoading)
+{
+    <div style="position:fixed;top:50%;left:50%;margin-top:-50px;margin-left:-100px">
+        <img src="images/book.gif" />
+    </div>
+}
+else
+{
+    <div class="container">
+
+        <h3>Article</h3>
+        <EditForm Model="Article" OnValidSubmit="UpSert">
+            <DataAnnotationsValidator></DataAnnotationsValidator>
+            <ValidationSummary></ValidationSummary>
+            <div class="form-group">
+                <label>Title</label>
+                <input class="form-control" @bind-value="@Article.Title">
+                <ValidationMessage For="@(()=> Article.Title)" />
+            </div>
+
+            <div class="form-group">
+                <label>Summary</label>
+                <input class="form-control" @bind-value="@Article.Summary" >
+                <ValidationMessage For="@(()=> Article.Summary)" />
+            </div>
+            <div class="form-group">
+                <label>Detail</label>
+                <input class="form-control" @bind-value="@Article.Detail">
+                <ValidationMessage For="@(()=> Article.Detail)" />
+            </div>
+            <div class="form-group">
+                <label>Category</label>
+
+                <InputSelect @bind-Value="Article.CategoryId" class="form-select">
+                    <option value="0" disabled="disabled" selected>--Select Category--</option>
+                    @foreach (var cat in Categories)
+                    {
+                        <option value="@cat.Id">@cat.Name</option>
+                    }
+                </InputSelect>
+                <ValidationMessage For="()=>Article.CategoryId"></ValidationMessage>
+            </div>
+            <div class="text-center mt-2">
+                <button class="btn btn-primary" type="submit">
+                    <span class="@_spinnerClass" role="status" aria-hidden="true"></span>
+                    Submit
+                </button>
+            </div>
+        </EditForm>
+    </div>
+
+}
+@code {
+    [Parameter]
+    public int Id { get; set; }
+    ArticleModel Article { get; set; } = new ArticleModel();
+    public List<CategoryModel> Categories { get; set; } = new List<CategoryModel>();
+    private string _spinnerClass = "";
+    public bool IsLoading { get; set; } = true;
+    protected override async Task OnInitializedAsync()
+    {
+        await Task.Delay(2000);
+        Categories = await cat.GettAllCategory();
+
+        if (Id == 0)
+        {
+            IsLoading = false;
+        }
+        else
+        {
+            Article = await art.GetById(Id);
+            IsLoading = false;
+        }
+    }
+
+    public async Task UpSert()
+    {
+        if (Id == 0)
+        {
+            var result = await art.AddUpdateArticle(Article);
+        }
+        else
+        {
+            var result = await art.AddUpdateArticle(Article);
+        }
+        nav.NavigateTo("/art");
+    }
+}

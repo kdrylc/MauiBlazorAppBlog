@@ -1,0 +1,75 @@
+﻿@page "/art"
+@using NetMauiBlazorApp.Models;
+@using NetMauiBlazorApp.Services;
+
+@inject IArticleService art
+@inject NavigationManager nav
+
+@if (IsLoading)
+{
+    <div style="position:fixed;top:50%;left:50%;margin-top:-50px;margin-left:-100px">
+        <img src="images/book.gif" />
+    </div>
+}
+else
+{
+    <h3>Article</h3>
+    <a class="btn btn-primary" href="/article/create">Create Article</a>
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>Id</th>
+                <th>Title</th>
+                <th>Summary</th>
+                <th>detail</th>
+                <th>Created</th>
+                <th>Category</th>
+                <th>User</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Articles)
+            {
+
+                <tr>
+                    <td>@item.Id</td>
+                    <td>@item.Title</td>
+                    <td>@item.Summary</td>
+                    <td>@item.Detail</td>
+                    <td>@item.Created</td>
+                    <td>@item.CategoryId</td>
+                    <td>@item.UserId</td>
+                    <td>
+                        <NavLink href="@($"/article/edit/{item.Id}")" class="btn btn-outline-success ">Edit </NavLink>
+                        <button class="btn btn-danger" @onclick="(()=>HandleDelete(item.Id))"> Delete</button>
+                    </td>
+
+                </tr>
+
+            }
+        </tbody>
+    </table>
+}
+
+
+@code {
+    public List<ArticleModel> Articles { get; set; } = new List<ArticleModel>();
+    public int ArticleId { get; set; }
+    public bool IsLoading { get; set; } = true;
+    protected override async Task OnInitializedAsync()
+    {
+        await Task.Delay(500);
+        Articles = await art.GettAllArticle();
+        IsLoading = false;
+
+    }
+    public async Task HandleDelete(int id)
+    {
+        await Task.Delay(500);
+        ArticleId = id;
+        await art.DeleteArticle(ArticleId);
+        nav.NavigateTo("/art");
+        IsLoading = false;
+    }
+}

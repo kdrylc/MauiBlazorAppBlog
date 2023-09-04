@@ -1,0 +1,79 @@
+﻿@page "/category/create"
+@page "/category/edit/{Id:int}"
+
+@using NetMauiBlazorApp.Models;
+@using NetMauiBlazorApp.Services;
+
+@inject ICategoryService cat
+@inject NavigationManager nav
+@if (IsLoading)
+{
+            <div style="position:fixed;top:50%;left:50%;margin-top:-50px;margin-left:-100px">
+            <img src="images/book.gif" />
+        </div>
+}
+else
+{
+
+    <div class="container">
+
+        <h3>CategoryUpsert</h3>
+        <EditForm Model="Category" OnValidSubmit="UpSert">
+            <DataAnnotationsValidator></DataAnnotationsValidator>
+            <ValidationSummary></ValidationSummary>
+            <div class="form-group">
+                <label>Name</label>
+                <input class="form-control" @bind-value="@Category.Name">
+                <ValidationMessage For="@(()=>Category.Name)"></ValidationMessage>
+
+            </div>
+
+            <div class="form-group">
+                <label>Description</label>
+                <input class="form-control" @bind-value="@Category.Description">
+                <ValidationMessage For="@(()=> Category.Description)" />
+            </div>
+            <div class="text-center mt-2">
+                <button class="btn btn-primary" type="submit">
+                    <span class="@_spinnerClass" role="status" aria-hidden="true"></span>
+                    Submit
+                </button>
+            </div>
+        </EditForm>
+    </div>
+
+}
+@code {
+    [Parameter]
+    public int Id { get; set; }
+    CategoryModel Category { get; set; } = new CategoryModel();
+    private string _spinnerClass = "";
+    public bool IsLoading { get; set; } = true;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await Task.Delay(500);
+        if (Id == 0)
+        {
+            IsLoading = false;
+        }
+        else
+        {
+            Category = await cat.GetById(Id);
+            IsLoading = false;
+        }
+    }
+
+    public async Task UpSert()
+    {
+        if (Id == 0)
+        {
+            var result = await cat.AddUpdateCategory(Category);
+        }
+        else
+        {
+            var result = await cat.AddUpdateCategory(Category);
+        }
+        nav.NavigateTo("/cat");
+    }
+}
